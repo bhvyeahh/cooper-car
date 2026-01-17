@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, MouseEvent } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   motion, 
   useScroll, 
@@ -13,17 +13,18 @@ import {
 } from "framer-motion";
 import { 
   ArrowRight, 
-  ArrowUpRight, 
-  CheckCircle2, 
+  Check,
   ChevronDown, 
   MapPin, 
   Phone, 
-  ShieldCheck, 
+  Shield, 
   Star, 
   Zap, 
   Menu, 
   X,
-  Droplets
+  Gauge,
+  Trophy,
+  Timer
 } from "lucide-react";
 import Link from "next/link";
 import { clsx, type ClassValue } from "clsx";
@@ -34,7 +35,6 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- HOOKS ---
 const useMousePosition = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   useEffect(() => {
@@ -46,85 +46,56 @@ const useMousePosition = () => {
   return mousePosition;
 };
 
-// --- MICRO COMPONENTS ---
+// --- CUSTOM COMPONENTS ---
 
-// 1. Magnetic Button (Sticks to cursor)
-const MagneticButton = ({ children, className }: { children: React.ReactNode; className?: string }) => {
-  const ref = useRef<HTMLButtonElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const xSpring = useSpring(x, { stiffness: 150, damping: 15, mass: 0.1 });
-  const ySpring = useSpring(y, { stiffness: 150, damping: 15, mass: 0.1 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const { clientX, clientY } = e;
-    const { height, width, left, top } = ref.current!.getBoundingClientRect();
-    const middleX = clientX - (left + width / 2);
-    const middleY = clientY - (top + height / 2);
-    x.set(middleX * 0.2); // Magnetic strength
-    y.set(middleY * 0.2);
-  };
-
-  const reset = () => {
-    x.set(0);
-    y.set(0);
-  };
-
+// 1. Carbon Fiber Button
+// A button that looks like a push-to-start engine button
+const EngineButton = ({ children, className }: { children: React.ReactNode; className?: string }) => {
   return (
     <motion.button
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={reset}
-      style={{ x: xSpring, y: ySpring }}
-      className={cn("relative z-10", className)}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className={cn(
+        "relative group overflow-hidden bg-amber-500 text-black font-black uppercase tracking-wider py-4 px-8 skew-x-[-12deg]",
+        className
+      )}
     >
-      {children}
+      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+      <span className="relative inline-flex items-center gap-2 skew-x-[12deg]">
+        {children}
+      </span>
     </motion.button>
   );
 };
 
-// 2. Spotlight Card (Apple-style glow)
-const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
-  }
-
+// 2. Speed Card
+// A card with aggressive slanted edges
+const SpeedCard = ({ children, className, index = 0 }: { children: React.ReactNode; className?: string; index?: number }) => {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1, duration: 0.5 }}
       className={cn(
-        "group relative border border-white/10 bg-zinc-900/40 overflow-hidden",
+        "relative bg-zinc-900 border-l-4 border-zinc-800 hover:border-amber-500 transition-colors duration-300 p-8 overflow-hidden group",
         className
       )}
-      onMouseMove={handleMouseMove}
     >
-      <motion.div
-        className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
-        style={{
-          background: useMotionTemplate`
-            radial-gradient(
-              650px circle at ${mouseX}px ${mouseY}px,
-              rgba(6, 182, 212, 0.10),
-              transparent 80%
-            )
-          `,
-        }}
-      />
-      <div className="relative h-full">{children}</div>
-    </div>
+      {/* Hover Grid Background */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-10 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:16px_16px] transition-opacity duration-500" />
+      <div className="relative z-10">{children}</div>
+    </motion.div>
   );
 };
 
-// 3. Grain Overlay (Cinematic Texture)
-const Grain = () => (
-  <div className="pointer-events-none fixed inset-0 z-[1] opacity-20 mix-blend-overlay">
-    <div className="absolute inset-0 w-full h-full bg-[url('https://upload.wikimedia.org/wikipedia/commons/7/76/Noise.png')] animate-grain" />
-  </div>
+// 3. Hex Pattern Background
+const HexBackground = () => (
+  <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03]"
+       style={{
+         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+       }}
+  />
 );
 
 // --- SECTIONS ---
@@ -140,402 +111,399 @@ const Navbar = () => {
   return (
     <motion.nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-6 transition-all duration-500",
-        isScrolled ? "bg-black/50 backdrop-blur-xl border-b border-white/5 py-4" : "bg-transparent"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/0",
+        isScrolled ? "bg-zinc-950/80 backdrop-blur-md border-white/10 py-4" : "py-8 bg-gradient-to-b from-black/80 to-transparent"
       )}
     >
-      <div className="flex items-center gap-2">
-        <div className="w-3 h-3 bg-cyan-500 rounded-full animate-pulse" />
-        <span className="text-xl font-black font-orbitron text-white tracking-tighter">
-          JT'S<span className="text-cyan-500">.</span>
-        </span>
-      </div>
-
-      <div className="hidden md:flex items-center gap-8">
-        {["Expertise", "Services", "Gallery", "Contact"].map((item) => (
-          <a 
-            key={item} 
-            href={`#${item.toLowerCase()}`}
-            className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors relative group"
-          >
-            {item}
-            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-cyan-500 transition-all duration-300 group-hover:w-full" />
-          </a>
-        ))}
-      </div>
-
-      <Link href="/booking">
-        <MagneticButton className="hidden md:block">
-          <div className="relative px-6 py-2 overflow-hidden bg-white text-black font-bold text-xs uppercase tracking-widest hover:bg-cyan-400 transition-colors skew-x-[-12deg]">
-            <span className="block skew-x-[12deg]">Book Now</span>
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center gap-1 group cursor-pointer">
+          <div className="w-8 h-8 bg-amber-500 text-black flex items-center justify-center font-black skew-x-[-12deg]">
+            <span className="skew-x-[12deg]">C</span>
           </div>
-        </MagneticButton>
-      </Link>
-      
-      <button className="md:hidden text-white">
-        <Menu className="w-6 h-6" />
-      </button>
+          <span className="text-xl font-black text-white uppercase tracking-tighter italic group-hover:text-amber-500 transition-colors">
+            ooper<span className="text-amber-500">Detail</span>
+          </span>
+        </div>
+
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-10">
+          {["Garage", "Packages", "Process", "Reviews"].map((item) => (
+            <a 
+              key={item} 
+              href={`#${item.toLowerCase()}`}
+              className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors relative"
+            >
+              {item}
+            </a>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <Link href="/booking" className="hidden md:block">
+           <button className="border border-white/20 px-6 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-white hover:text-black transition-all duration-300">
+             Reserve Slot
+           </button>
+        </Link>
+
+        {/* Mobile Menu */}
+        <button className="md:hidden text-white">
+          <Menu className="w-6 h-6" />
+        </button>
+      </div>
     </motion.nav>
   );
 };
 
 const Hero = () => {
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 1000], [0, 300]);
-  const opacity = useTransform(scrollY, [0, 500], [1, 0]);
-  const textY = useTransform(scrollY, [0, 500], [0, 150]);
-
+  const y = useTransform(scrollY, [0, 1000], [0, 400]);
+  
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-zinc-950 flex items-center justify-center">
-      {/* Background Image (Parallax) */}
-      <motion.div 
-        style={{ y, opacity }} 
-        className="absolute inset-0 z-0"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-950/50 to-zinc-950 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/80 via-transparent to-zinc-950/80 z-10" />
+    <section className="relative h-screen w-full overflow-hidden bg-zinc-950 flex items-center">
+      {/* Dynamic Background */}
+      <motion.div style={{ y }} className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/60 to-transparent z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent z-10" />
         <img 
-          src="https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=2670&auto=format&fit=crop" 
-          alt="Luxury Car Detail" 
-          className="w-full h-full object-cover opacity-60 scale-110"
+          src="https://images.unsplash.com/photo-1614207213854-4693b1675a33?q=80&w=2574&auto=format&fit=crop" 
+          alt="Lamborghini Detail" 
+          className="w-full h-full object-cover scale-110"
         />
       </motion.div>
 
-      {/* Main Content */}
-      <div className="relative z-20 w-full max-w-[1400px] px-6 md:px-12 flex flex-col justify-end h-full pb-20 md:pb-32">
-        <motion.div 
-          style={{ y: textY }}
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="px-3 py-1 border border-cyan-500/30 rounded-full bg-cyan-950/10 backdrop-blur-md">
-              <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">
-                ● Available in Los Angeles
-              </span>
-            </div>
-            <div className="h-[1px] w-20 bg-white/20" />
-          </div>
-
-          <h1 className="text-6xl md:text-[8vw] leading-[0.85] font-black font-orbitron text-white tracking-tighter uppercase mb-8">
-            Precision <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-400 to-gray-600">
-              Protocol
+      {/* Content */}
+      <div className="relative z-20 w-full max-w-[1600px] mx-auto px-6 md:px-12 pt-20">
+        <div className="max-w-3xl">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="flex items-center gap-4 mb-6"
+          >
+            <div className="h-[2px] w-12 bg-amber-500" />
+            <span className="text-amber-500 font-bold uppercase tracking-[0.3em] text-sm">
+              Elite Mobile Detailing
             </span>
-          </h1>
+          </motion.div>
 
-          <div className="flex flex-col md:flex-row items-end justify-between gap-8 border-t border-white/10 pt-8">
-            <p className="max-w-md text-gray-400 text-lg leading-relaxed">
-              We don't just wash cars. We perform automotive surgery. 
-              The most advanced mobile detailing unit in California.
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-6xl md:text-9xl font-black text-white uppercase italic tracking-tighter leading-[0.9] mb-10"
+          >
+            Showroom <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-600">
+              Condition.
+            </span>
+          </motion.h1>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex flex-col md:flex-row gap-6 items-start md:items-center"
+          >
+            <Link href="/booking">
+              <EngineButton>
+                Start Your Build <ArrowRight className="w-5 h-5" />
+              </EngineButton>
+            </Link>
+            <p className="text-zinc-400 max-w-sm text-sm leading-relaxed border-l border-zinc-700 pl-4">
+              Premium automotive care delivered to your driveway. 
+              Specializing in paint correction and ceramic protection.
             </p>
-            
-            <div className="flex gap-4">
-               <Link href="/booking">
-                 <MagneticButton>
-                    <div className="group flex items-center gap-3 bg-cyan-500 px-8 py-4 rounded-full text-black font-bold transition-all hover:bg-white">
-                      <span>Start Your Build</span>
-                      <ArrowRight className="w-5 h-5 group-hover:-rotate-45 transition-transform duration-300" />
-                    </div>
-                 </MagneticButton>
-               </Link>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
-      
-      {/* Scroll Indicator */}
-      <motion.div 
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30"
-      >
-        <ChevronDown className="w-6 h-6" />
-      </motion.div>
+
+      {/* RPM Gauge Decoration */}
+      <div className="absolute bottom-10 right-10 hidden md:block opacity-20 animate-pulse">
+        <Gauge className="w-32 h-32 text-white" strokeWidth={1} />
+      </div>
     </section>
   );
 };
 
-const Marquee = () => {
+const StatsBar = () => {
   return (
-    <div className="relative z-30 bg-cyan-500 py-3 overflow-hidden -rotate-1 origin-left scale-110 border-y-4 border-black">
-      <div className="flex gap-8 animate-marquee whitespace-nowrap">
-        {Array(10).fill("LUXURY • PROTECTION • CONCOURS • MOBILE •").map((text, i) => (
-          <span key={i} className="text-2xl font-black italic text-black font-orbitron tracking-tighter">
-            {text}
-          </span>
+    <div className="bg-amber-500 relative z-30 py-6">
+      <div className="max-w-[1600px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+        {[
+          { label: "Vehicles Detailed", value: "500+" },
+          { label: "5-Star Reviews", value: "100%" },
+          { label: "Service Area", value: "Metro Area" },
+          { label: "Insured", value: "Fully Covered" },
+        ].map((stat, i) => (
+          <div key={i} className="text-black flex flex-col items-center md:items-start border-r border-black/10 last:border-0">
+            <span className="text-3xl font-black italic tracking-tighter">{stat.value}</span>
+            <span className="text-xs font-bold uppercase tracking-widest opacity-80">{stat.label}</span>
+          </div>
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-// --- SERVICES SECTION (Spotlight Cards) ---
+// --- SERVICES (The "Spec Sheet") ---
 const Services = () => {
   const services = [
     {
-      id: "01",
-      title: "Paint Correction",
-      desc: "Removal of swirls, scratches, and oxidation to restore showroom depth.",
-      price: "$450+",
-      icon: ShieldCheck
+      title: "The Daily Driver",
+      subtitle: "Maintenance Wash",
+      price: "$150",
+      features: ["Foam Cannon Pre-Soak", "Two-Bucket Hand Wash", "Wheel Deep Clean", "Interior Vacuum & Wipe", "Spray Wax Application"],
+      icon: Trophy
     },
     {
-      id: "02",
-      title: "Ceramic Coating",
-      desc: "5-Year molecular bond protection against environmental fallout.",
-      price: "$890+",
-      icon: Zap
+      title: "The Enthusiast",
+      subtitle: "Enhancement Detail",
+      price: "$350",
+      features: ["Iron Decontamination", "Clay Bar Treatment", "1-Step Machine Polish", "Leather Conditioning", "6-Month Sealant"],
+      icon: Zap,
+      popular: true
     },
     {
-      id: "03",
-      title: "Interior Restoration",
-      desc: "Steam cleaning, leather matte-finish conditioning, and odor removal.",
-      price: "$250+",
-      icon: Star
+      title: "The Concours",
+      subtitle: "Correction & Coating",
+      price: "$850+",
+      features: ["Multi-Step Paint Correction", "Ceramic Coating (3+ Years)", "Engine Bay Detail", "Carpet Extraction", "Windshield Coating"],
+      icon: Shield
     }
   ];
 
   return (
-    <section id="services" className="py-32 bg-zinc-950 relative z-20">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-20">
+    <section id="packages" className="py-32 bg-zinc-950 relative z-20">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
           <div>
-            <h2 className="text-4xl md:text-7xl font-black font-orbitron text-white uppercase mb-4">
-              The <span className="text-cyan-500">Menu</span>
+            <span className="text-amber-500 font-mono text-sm uppercase tracking-widest">Select Your Trim Level</span>
+            <h2 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter mt-2">
+              Service <span className="text-zinc-700">Specs</span>
             </h2>
-            <p className="text-gray-500 max-w-sm">
-              Tailored packages for the discerning enthusiast.
-            </p>
           </div>
-          <Link href="/booking" className="hidden md:block text-white border-b border-cyan-500 pb-1 hover:text-cyan-500 transition-colors">
-            View Full Price List
-          </Link>
+          <div className="flex gap-2">
+            <div className="w-12 h-1 bg-amber-500 skew-x-[-20deg]" />
+            <div className="w-4 h-1 bg-zinc-700 skew-x-[-20deg]" />
+            <div className="w-2 h-1 bg-zinc-700 skew-x-[-20deg]" />
+          </div>
         </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {services.map((s, i) => (
+            <SpeedCard key={i} index={i} className={cn("h-full flex flex-col", s.popular && "border-l-amber-500 bg-zinc-900/80")}>
+               {s.popular && (
+                 <div className="absolute top-0 right-0 bg-amber-500 text-black text-[10px] font-bold uppercase px-3 py-1">
+                   Most Popular
+                 </div>
+               )}
+               <div className="mb-8">
+                 <s.icon className={cn("w-10 h-10 mb-6", s.popular ? "text-amber-500" : "text-zinc-600")} strokeWidth={1.5} />
+                 <h3 className="text-2xl font-black text-white uppercase italic">{s.title}</h3>
+                 <p className="text-zinc-500 text-sm uppercase tracking-wider mt-1">{s.subtitle}</p>
+               </div>
+               
+               <ul className="space-y-4 mb-12 flex-grow">
+                 {s.features.map((f, idx) => (
+                   <li key={idx} className="flex items-start gap-3 text-gray-300 text-sm">
+                     <Check className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                     {f}
+                   </li>
+                 ))}
+               </ul>
+
+               <div className="pt-8 border-t border-white/5 flex items-center justify-between">
+                 <div className="flex flex-col">
+                   <span className="text-[10px] text-zinc-500 uppercase">Starting At</span>
+                   <span className="text-3xl font-black text-white italic">{s.price}</span>
+                 </div>
+                 <Link href="/booking">
+                    <button className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-amber-500 hover:text-black hover:border-amber-500 transition-all">
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
+                 </Link>
+               </div>
+            </SpeedCard>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// --- SHOWCASE (The "Gallery") ---
+const Showcase = () => {
+    return (
+        <section className="py-20 bg-black overflow-hidden">
+            <div className="flex gap-4 animate-marquee hover:[animation-play-state:paused]">
+                {[1,2,3,4,5].map((_, i) => (
+                    <div key={i} className="min-w-[400px] md:min-w-[600px] aspect-[16/9] relative skew-x-[-6deg] overflow-hidden border-2 border-zinc-800 grayscale hover:grayscale-0 transition-all duration-500">
+                        <img 
+                            src={`https://images.unsplash.com/photo-${i % 2 === 0 ? '1605559424843-9e4c228bf1c2' : '1503376763036-066120622c74'}?q=80&w=1000&auto=format&fit=crop`}
+                            alt="Car Detail"
+                            className="w-full h-full object-cover scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                        <div className="absolute bottom-6 left-6">
+                            <h4 className="text-white font-black uppercase text-xl italic">Project 0{i+1}</h4>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            
+            <style jsx>{`
+                .animate-marquee {
+                    animation: marquee 30s linear infinite;
+                }
+                @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+            `}</style>
+        </section>
+    )
+}
+
+// --- PROCESS (The "Blueprint") ---
+const Process = () => {
+  return (
+    <section id="process" className="py-32 bg-zinc-950 border-t border-zinc-900">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-20 items-center">
+        <div className="relative">
+            <div className="absolute -inset-4 bg-amber-500/20 blur-3xl rounded-full opacity-20" />
+            <img 
+                src="https://images.unsplash.com/photo-1600705723393-e6efd74e83c7?q=80&w=2070&auto=format&fit=crop" 
+                alt="Polishing Process" 
+                className="relative z-10 w-full rounded-sm grayscale contrast-125 border border-zinc-800"
+            />
+            {/* Tech Specs Overlay */}
+            <div className="absolute -bottom-6 -right-6 bg-zinc-900 p-6 border border-zinc-800 z-20 max-w-xs">
+                <div className="flex items-center gap-3 mb-2">
+                    <Timer className="text-amber-500 w-5 h-5" />
+                    <span className="text-white font-bold uppercase text-xs">Precision Timing</span>
+                </div>
+                <p className="text-zinc-500 text-xs leading-relaxed">
+                    Every vehicle undergoes a strict 4-stage decontamination process before any machine touches the paint.
+                </p>
+            </div>
+        </div>
+
+        <div>
+            <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter mb-10">
+                The <span className="text-amber-500">Method</span>
+            </h2>
+            
+            <div className="space-y-8">
+                {[
+                    { title: "Decontamination", desc: "Chemical iron removal and clay bar treatment to remove embedded road grime." },
+                    { title: "Correction", desc: "Dual-action machine polishing to level clear coat and remove swirl marks." },
+                    { title: "Protection", desc: "Application of SiO2 Ceramic Sealant for hydrophobic water beading." }
+                ].map((step, i) => (
+                    <div key={i} className="group cursor-default">
+                        <div className="flex items-center gap-4 mb-2">
+                            <span className="text-3xl font-black text-zinc-800 group-hover:text-amber-500 transition-colors italic">0{i+1}</span>
+                            <h3 className="text-xl font-bold text-white uppercase">{step.title}</h3>
+                        </div>
+                        <p className="text-zinc-500 pl-12 border-l border-zinc-800 group-hover:border-amber-500 transition-colors duration-300">
+                            {step.desc}
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// --- TESTIMONIALS (The "Paddock") ---
+const Reviews = () => {
+  return (
+    <section id="reviews" className="py-32 bg-zinc-950 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-zinc-900 to-transparent skew-x-[-12deg] pointer-events-none" />
+      
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 relative z-10">
+        <h2 className="text-center text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-20">
+            Client <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-300">Feedback</span>
+        </h2>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {services.map((s, i) => (
-            <SpotlightCard key={i} className="h-[500px] flex flex-col justify-between p-10 bg-zinc-900/50">
-              <div>
-                <div className="flex justify-between items-start mb-8">
-                  <span className="text-5xl font-black text-white/5 font-orbitron">{s.id}</span>
-                  <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-black transition-all duration-500">
-                    <s.icon className="w-6 h-6" />
-                  </div>
+            {[
+                { name: "Marcus T.", car: "Ferrari 488", text: "Oscar is the only person I trust with my paint. The ceramic coating is absolutely bulletproof." },
+                { name: "Jessica L.", car: "Tesla Model X", text: "Looks better than the day I picked it up from the dealership. Worth every penny." },
+                { name: "Ryan B.", car: "BMW M4", text: "Professional, punctual, and obsessed with details. The interior feels brand new." }
+            ].map((review, i) => (
+                <div key={i} className="bg-zinc-900/50 backdrop-blur-sm border border-white/5 p-8 hover:border-amber-500/50 transition-colors duration-300">
+                    <div className="flex gap-1 text-amber-500 mb-6">
+                        <Star className="fill-current w-4 h-4" />
+                        <Star className="fill-current w-4 h-4" />
+                        <Star className="fill-current w-4 h-4" />
+                        <Star className="fill-current w-4 h-4" />
+                        <Star className="fill-current w-4 h-4" />
+                    </div>
+                    <p className="text-gray-300 italic mb-6">"{review.text}"</p>
+                    <div className="flex items-center justify-between border-t border-white/5 pt-4">
+                        <span className="font-bold text-white uppercase">{review.name}</span>
+                        <span className="text-xs text-amber-500 font-mono">{review.car}</span>
+                    </div>
                 </div>
-                <h3 className="text-3xl font-bold font-orbitron text-white mb-4 uppercase">{s.title}</h3>
-                <div className="w-12 h-1 bg-cyan-500 mb-6" />
-                <p className="text-gray-400 text-lg leading-relaxed">{s.desc}</p>
-              </div>
-              <div className="flex items-end justify-between border-t border-white/10 pt-6">
-                <div>
-                   <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">Starting At</span>
-                   <span className="text-2xl font-mono text-white">{s.price}</span>
-                </div>
-                <ArrowUpRight className="text-white/30 group-hover:text-cyan-500 group-hover:rotate-45 transition-all duration-500" />
-              </div>
-            </SpotlightCard>
-          ))}
+            ))}
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-// --- PROCESS SECTION (Parallax Text) ---
-const Process = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const textY = useTransform(scrollYProgress, [0, 1], [0, 200]);
-
-  return (
-    <section ref={containerRef} className="relative py-40 bg-black overflow-hidden flex items-center justify-center min-h-screen">
-      {/* Background Huge Text */}
-      <motion.div 
-        style={{ y: textY }} 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center z-0 pointer-events-none opacity-20"
-      >
-        <h2 className="text-[25vw] leading-none font-black font-orbitron text-zinc-800 tracking-tighter whitespace-nowrap">
-          OBSESSION
-        </h2>
-      </motion.div>
-
-      {/* Floating Image Card */}
-      <motion.div 
-        style={{ y }}
-        className="relative z-10 max-w-4xl w-full px-6"
-      >
-        <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
-          <img 
-            src="https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=2070&auto=format&fit=crop" 
-            alt="Detailing Process"
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-          {/* Overlay Content */}
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 bg-gradient-to-t from-black via-black/80 to-transparent">
-             <div className="flex items-end justify-between">
-                <div>
-                  <div className="text-cyan-500 font-mono text-xs uppercase tracking-widest mb-2">The Difference</div>
-                  <h3 className="text-3xl md:text-5xl font-bold font-orbitron text-white">Zero Swirls.</h3>
-                </div>
-                <div className="hidden md:block max-w-xs text-right text-gray-300">
-                  We use forced-air drying and single-use microfiber towels to ensure your paint is never scratched during the wash process.
-                </div>
-             </div>
-          </div>
-        </div>
-      </motion.div>
-    </section>
-  );
-};
-
-// --- TESTIMONIALS (Masonry) ---
-const Reviews = () => {
-  const reviews = [
-    { name: "Alex V.", car: "Porsche 911 GT3", text: "I didn't think my paint could look this wet. JT is a wizard." },
-    { name: "Sarah M.", car: "Range Rover", text: "He showed up on time, fully equipped. My car looks brand new." },
-    { name: "David K.", car: "McLaren 720s", text: "Trusted him with my supercar. The ceramic coating is flawless." }
-  ];
-
-  return (
-    <section id="reviews" className="py-32 bg-zinc-950 border-t border-white/5">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-        <h2 className="text-4xl md:text-6xl font-bold font-orbitron text-white text-center mb-20">
-          Client <span className="text-cyan-500">Stories</span>
-        </h2>
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          {reviews.map((r, i) => (
-            <div key={i} className="group p-8 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors duration-300">
-              <div className="flex gap-1 text-cyan-500 mb-6">
-                {[1,2,3,4,5].map(star => <Star key={star} className="fill-current w-4 h-4" />)}
-              </div>
-              <p className="text-xl text-gray-200 mb-8 leading-relaxed">"{r.text}"</p>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-sm">
-                  {r.name.charAt(0)}
-                </div>
-                <div>
-                  <div className="font-bold text-white">{r.name}</div>
-                  <div className="text-xs text-gray-500 uppercase tracking-widest">{r.car}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// --- FOOTER (Massive) ---
 const Footer = () => {
-  return (
-    <footer className="bg-black pt-40 pb-12 px-6 md:px-12 border-t border-white/10 relative overflow-hidden">
-      <div className="max-w-[1400px] mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-24">
-          <div>
-            <h2 className="text-[12vw] leading-[0.8] font-black font-orbitron text-white tracking-tighter mb-8">
-              JT'S<span className="text-cyan-500">.</span>
-            </h2>
-            <div className="flex flex-col gap-4">
-               <div className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors cursor-pointer">
-                 <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
-                   <MapPin className="w-4 h-4" />
-                 </div>
-                 <span>Los Angeles, CA</span>
-               </div>
-               <div className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors cursor-pointer">
-                 <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
-                   <Phone className="w-4 h-4" />
-                 </div>
-                 <span>(555) 987-6543</span>
-               </div>
-            </div>
-          </div>
-          
-          <div className="mt-12 md:mt-0 text-right">
-             <Link href="/booking">
-                <div className="group inline-flex items-center gap-4 cursor-pointer">
-                  <span className="text-4xl md:text-6xl font-black text-white uppercase font-orbitron group-hover:text-cyan-500 transition-colors">
-                    Book Now
-                  </span>
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <ArrowRight className="w-8 h-8 text-black group-hover:-rotate-45 transition-transform duration-500" />
-                  </div>
+    return (
+        <footer className="bg-black text-zinc-500 py-20 px-6 border-t border-zinc-900">
+            <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+                <div className="text-2xl font-black text-white italic uppercase">
+                    Cooper<span className="text-amber-500">.</span>
                 </div>
-             </Link>
-             <p className="text-gray-500 mt-6 max-w-md ml-auto">
-               Premium mobile detailing service for Los Angeles and surrounding counties. Fully insured and certified.
-             </p>
-          </div>
-        </div>
+                
+                <div className="flex gap-8 text-sm font-bold uppercase tracking-widest">
+                    <a href="#" className="hover:text-white transition-colors">Instagram</a>
+                    <a href="#" className="hover:text-white transition-colors">Email</a>
+                    <a href="#" className="hover:text-white transition-colors">Book Now</a>
+                </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 text-xs text-gray-600 font-mono uppercase">
-           <span>© 2026 JT's Mobile Auto Detailing</span>
-           <div className="flex gap-8 mt-4 md:mt-0">
-             <a href="#" className="hover:text-white transition-colors">Instagram</a>
-             <a href="#" className="hover:text-white transition-colors">Facebook</a>
-             <a href="#" className="hover:text-white transition-colors">Privacy</a>
-           </div>
-        </div>
-      </div>
-    </footer>
-  );
-};
+                <div className="text-xs uppercase tracking-widest text-zinc-700">
+                    © 2026 Cooper's Mobile Detail
+                </div>
+            </div>
+        </footer>
+    )
+}
 
-// --- MAIN PAGE COMPONENT ---
+
+// --- MAIN PAGE ---
 
 export default function Home() {
   const { x, y } = useMousePosition();
   
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-cyan-500/30 selection:text-cyan-100 overflow-x-hidden">
-      {/* Styles for Grain Animation */}
-      <style jsx global>{`
-        @keyframes grain {
-          0%, 100% { transform: translate(0, 0); }
-          10% { transform: translate(-5%, -10%); }
-          20% { transform: translate(-15%, 5%); }
-          30% { transform: translate(7%, -25%); }
-          40% { transform: translate(-5%, 25%); }
-          50% { transform: translate(-15%, 10%); }
-          60% { transform: translate(15%, 0%); }
-          70% { transform: translate(0%, 15%); }
-          80% { transform: translate(3%, 35%); }
-          90% { transform: translate(-10%, 10%); }
-        }
-        .animate-grain {
-          animation: grain 8s steps(10) infinite;
-        }
-        .animate-marquee {
-          animation: marquee 20s linear infinite;
-        }
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
-
-      <Grain />
+    <main className="min-h-screen bg-black text-white selection:bg-amber-500 selection:text-black overflow-x-hidden font-sans">
+        <HexBackground />
       
-      {/* Custom Cursor (Desktop Only) */}
+      {/* Custom Crosshair Cursor */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full border border-white/50 pointer-events-none z-[100] hidden md:block mix-blend-difference"
-        animate={{ x: x - 16, y: y - 16 }}
-        transition={{ type: "tween", ease: "backOut", duration: 0.1 }}
+        className="fixed top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-amber-500 pointer-events-none z-[100] hidden md:block mix-blend-difference"
+        animate={{ x: x - 3, y: y - 3 }}
+        transition={{ type: "tween", ease: "linear", duration: 0 }}
+      />
+      <motion.div
+        className="fixed top-0 left-0 w-6 h-6 border-r-2 border-b-2 border-amber-500 pointer-events-none z-[100] hidden md:block mix-blend-difference"
+        animate={{ x: x - 20, y: y - 20 }}
+        transition={{ type: "tween", ease: "linear", duration: 0.1 }}
       />
       
       <Navbar />
       <Hero />
-      <Marquee />
+      <StatsBar />
       <Services />
+      <Showcase />
       <Process />
       <Reviews />
       <Footer />
