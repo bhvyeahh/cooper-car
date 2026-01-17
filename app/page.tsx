@@ -334,36 +334,36 @@ const Services = () => {
 
 // --- SHOWCASE (The "Gallery") ---
 const Showcase = () => {
-    return (
-        <section className="py-20 bg-black overflow-hidden">
-            <div className="flex gap-4 animate-marquee hover:[animation-play-state:paused]">
-                {[1,2,3,4,5].map((_, i) => (
-                    <div key={i} className="min-w-[400px] md:min-w-[600px] aspect-[16/9] relative skew-x-[-6deg] overflow-hidden border-2 border-zinc-800 grayscale hover:grayscale-0 transition-all duration-500">
-                        <img 
-                            src={`https://images.unsplash.com/photo-${i % 2 === 0 ? '1605559424843-9e4c228bf1c2' : '1503376763036-066120622c74'}?q=80&w=1000&auto=format&fit=crop`}
-                            alt="Car Detail"
-                            className="w-full h-full object-cover scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                        <div className="absolute bottom-6 left-6">
-                            <h4 className="text-white font-black uppercase text-xl italic">Project 0{i+1}</h4>
-                        </div>
-                    </div>
-                ))}
+  return (
+    <section className="py-20 bg-black overflow-hidden">
+      <div className="flex gap-4 animate-marquee hover:[animation-play-state:paused]">
+        {[1, 2, 3, 4, 5].map((_, i) => (
+          <div
+            key={i}
+            className="min-w-[400px] md:min-w-[600px] aspect-[16/9] relative skew-x-[-6deg] overflow-hidden border-2 border-zinc-800 grayscale hover:grayscale-0 transition-all duration-500"
+          >
+            <img
+              src={`https://images.unsplash.com/photo-${
+                i % 2 === 0
+                  ? "1605559424843-9e4c228bf1c2"
+                  : "1503376763036-066120622c74"
+              }?q=80&w=1000&auto=format&fit=crop`}
+              alt="Car Detail"
+              className="w-full h-full object-cover scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="absolute bottom-6 left-6">
+              <h4 className="text-white font-black uppercase text-xl italic">
+                Project 0{i + 1}
+              </h4>
             </div>
-            
-            <style jsx>{`
-                .animate-marquee {
-                    animation: marquee 30s linear infinite;
-                }
-                @keyframes marquee {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-50%); }
-                }
-            `}</style>
-        </section>
-    )
-}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 
 // --- PROCESS (The "Blueprint") ---
 const Process = () => {
@@ -373,7 +373,7 @@ const Process = () => {
         <div className="relative">
             <div className="absolute -inset-4 bg-amber-500/20 blur-3xl rounded-full opacity-20" />
             <img 
-                src="https://images.unsplash.com/photo-1600705723393-e6efd74e83c7?q=80&w=2070&auto=format&fit=crop" 
+                src="https://images.pexels.com/photos/4870692/pexels-photo-4870692.jpeg" 
                 alt="Polishing Process" 
                 className="relative z-10 w-full rounded-sm grayscale contrast-125 border border-zinc-800"
             />
