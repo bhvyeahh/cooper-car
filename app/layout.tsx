@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 
 export const metadata: Metadata = {
-  title: "Cooper Auto Shine | Premium Detailing",
+  title: "ScrubzOC | Premium Detailing",
   description: "Experience the ultimate car care.",
 };
 

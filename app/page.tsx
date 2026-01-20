@@ -119,10 +119,10 @@ const Navbar = () => {
         {/* Logo */}
         <div className="flex items-center gap-1 group cursor-pointer">
           <div className="w-8 h-8 bg-amber-500 text-black flex items-center justify-center font-black skew-x-[-12deg]">
-            <span className="skew-x-[12deg]">C</span>
+            <span className="skew-x-[12deg]">S</span>
           </div>
           <span className="text-xl font-black text-white uppercase tracking-tighter italic group-hover:text-amber-500 transition-colors">
-            ooper<span className="text-amber-500">Detail</span>
+            crubz<span className="text-amber-500">OC</span>
           </span>
         </div>
 
@@ -346,7 +346,7 @@ const Showcase = () => {
               src={`https://images.unsplash.com/photo-${
                 i % 2 === 0
                   ? "1605559424843-9e4c228bf1c2"
-                  : "1503376763036-066120622c74"
+                  : "1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               }?q=80&w=1000&auto=format&fit=crop`}
               alt="Car Detail"
               className="w-full h-full object-cover scale-110"
@@ -430,7 +430,7 @@ const Reviews = () => {
 
         <div className="grid md:grid-cols-3 gap-6">
             {[
-                { name: "Marcus T.", car: "Ferrari 488", text: "Oscar is the only person I trust with my paint. The ceramic coating is absolutely bulletproof." },
+                { name: "Marcus T.", car: "Ferrari 488", text: "ScrubzOC is the only person I trust with my paint. The ceramic coating is absolutely bulletproof." },
                 { name: "Jessica L.", car: "Tesla Model X", text: "Looks better than the day I picked it up from the dealership. Worth every penny." },
                 { name: "Ryan B.", car: "BMW M4", text: "Professional, punctual, and obsessed with details. The interior feels brand new." }
             ].map((review, i) => (
@@ -460,7 +460,7 @@ const Footer = () => {
         <footer className="bg-black text-zinc-500 py-20 px-6 border-t border-zinc-900">
             <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
                 <div className="text-2xl font-black text-white italic uppercase">
-                    Cooper<span className="text-amber-500">.</span>
+                    ScrubzOC<span className="text-amber-500">.</span>
                 </div>
                 
                 <div className="flex gap-8 text-sm font-bold uppercase tracking-widest">
@@ -470,7 +470,7 @@ const Footer = () => {
                 </div>
 
                 <div className="text-xs uppercase tracking-widest text-zinc-700">
-                    © 2026 Cooper's Mobile Detail
+                    © 2026 ScrubzOC's Mobile Detail
                 </div>
             </div>
         </footer>
